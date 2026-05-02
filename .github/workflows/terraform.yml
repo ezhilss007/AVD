@@ -1,7 +1,4 @@
-# Terraform workflow with an optional ODO deployment step for OpenShift.
-# The workflow uses terraform.tfvars for root module variable values.
-
-name: 'Terraform and ODO Deployment'
+name: 'Terraform Azure Deployment'
 
 on:
   push:
@@ -24,6 +21,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
 
@@ -42,37 +46,3 @@ jobs:
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: terraform apply -auto-approve -input=false -var-file=terraform.tfvars
-
-  odo-deploy:
-    name: 'ODO Deployment'
-    needs: terraform
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        shell: bash
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install ODO CLI
-        run: |
-          curl -L "https://github.com/openshift/odo/releases/download/v4.11.0/odo-linux-amd64" -o odo
-          chmod +x odo
-          sudo mv odo /usr/local/bin/odo
-
-      - name: Login to OpenShift
-        env:
-          OPENSHIFT_SERVER: ${{ secrets.OPENSHIFT_SERVER }}
-          OPENSHIFT_TOKEN: ${{ secrets.OPENSHIFT_TOKEN }}
-        run: odo login $OPENSHIFT_SERVER --token $OPENSHIFT_TOKEN --insecure-skip-tls-verify
-
-      - name: Select OpenShift project
-        run: |
-          odo project create ${{ secrets.OPENSHIFT_PROJECT }} || true
-          odo project set ${{ secrets.OPENSHIFT_PROJECT }}
-
-      - name: Deploy application with odo
-        run: odo push --context . --wait
