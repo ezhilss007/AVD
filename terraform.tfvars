@@ -1,0 +1,10 @@
+rg_name        = "avd-rg"
+location       = "East US"
+vm_count       = 2
+admin_username = "azureuser"
+admin_password = "P@ssw0rd1234!ChangeMe"
+vm_size        = "Standard_DS2_v2"
+hostpool_name  = "avd-hostpool"
+workspace_name = "avd-workspace"
+vnet_name      = "avd-vnet"
+subnet_name    = "avd-subnet"

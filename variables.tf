@@ -22,14 +22,21 @@ variable "admin_password" {
   type        = string
   sensitive   = true
 }
+variable "vm_size" {
+  description = "Size of the AVD session host VMs"
+  type        = string
+  default     = "Standard_DS2_v2"
+}
 # AVD-specific
 variable "hostpool_name" {
   description = "AVD Host Pool name"
   type        = string
+  default     = "avd-hostpool"
 }
 variable "workspace_name" {
   description = "AVD Workspace name"
   type        = string
+  default     = "avd-workspace"
 }
 # Network
 variable "vnet_name" {
